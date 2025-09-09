@@ -26,21 +26,21 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Messaging', 'Naming', 'Strategy'],
     label: 'How many client materials to review?',
     type: 'static_select',
-    options: ['3', '5', '10', '15'],
+    options: ['0','3', '5', '10', '15'],
   },
   {
     id: 'competitors_analyze',
     appliesTo: ['Messaging', 'Naming', 'Strategy'],
     label: 'How many competitors to analyze?',
     type: 'static_select',
-    options: ['2', '3', '5', '8'],
+    options: ['0','2', '3', '5', '8'],
   },
   {
     id: 'stakeholders_interview',
     appliesTo: ['Naming', 'Strategy'],
     label: 'How many stakeholders to interview?',
     type: 'static_select',
-    options: ['4', '8', '12', '20'],
+    options: ['0','4', '8', '12', '20'],
   },
 
   /** Messaging-only (non-complexity) */
@@ -49,7 +49,7 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Messaging'],
     label: 'Messaging: How long of a strategy work session is required?',
     type: 'static_select',
-    options: ['60 minutes', '1.5 hours', '4 hours'],
+    options: ['None','60 minutes', '1.5 hours', '4 hours'],
   },
   {
     id: 'messaging_review_rounds',
@@ -63,14 +63,14 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Messaging'],
     label: 'What duration would you prefer for the immersion call?',
     type: 'static_select',
-    options: ['60 mins', '90 mins', '120 mins'],
+    options: ['None','60 mins', '90 mins', '120 mins'],
   },
   {
     id: 'messaging_virtual_strategic_session',
     appliesTo: ['Messaging'],
     label: 'How many virtual strategic sessions?',
     type: 'static_select',
-    options: ['One', 'Two', 'Three'],
+    options: ['Zero','One', 'Two', 'Three'],
   },
 
   /** Naming-only (non-complexity) */
@@ -79,35 +79,35 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Naming'],
     label: 'Naming: How many unique creative naming territories?',
     type: 'static_select',
-    options: ['2', '4', '6'],
+    options: ['0','2', '4', '6'],
   },
   {
     id: 'naming_options',
     appliesTo: ['Naming'],
     label: 'Naming: How many naming options?',
     type: 'static_select',
-    options: ['100', '200', '300', '400'],
+    options: ['0','100', '200', '300', '400'],
   },
   {
     id: 'naming_prescreened_candidates',
     appliesTo: ['Naming'],
     label: 'Naming: How many pre-screened name candidates?',
     type: 'static_select',
-    options: ['10', '20', '30'],
+    options: ['0','10', '20', '30'],
   },
   {
     id: 'naming_legal_vetted',
     appliesTo: ['Naming'],
     label: 'Naming: How many shortlist name candidates are legally vetted?',
     type: 'static_select',
-    options: ['3', '6', '8', '10'],
+    options: ['0','3', '6', '8', '10'],
   },
   {
     id: 'naming_shortlist_legal_vetting',
     appliesTo: ['Naming'],
     label: 'Naming: How many shortlist name candidates for legal vetting?',
     type: 'static_select',
-    options: ['30', '50', '70', '100'],
+    options: ['0','30', '50', '70', '100'],
   },
 
   /** Advertisement-only (no overlaps) */
@@ -130,7 +130,7 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Advertisement'],
     label: 'Advertisement: Campaign Duration (weeks)',
     type: 'static_select',
-    options: ['2 weeks', '4 weeks', '8 weeks'],
+    options: ['0 weeks','2 weeks', '4 weeks', '8 weeks'],
   },
 ];
 

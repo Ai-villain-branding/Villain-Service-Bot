@@ -1,116 +1,207 @@
 require('dotenv').config();
 const { App } = require('@slack/bolt');
-const fetch = require('node-fetch'); // For Node <18, else remove if using Node 18+
+const fetch = require('node-fetch');
 
 /** -----------------------------
- * Services list (unchanged)
+ * Services (unchanged)
  * ----------------------------- */
 const SERVICES = ['Messaging', 'Advertisement', 'Naming', 'Strategy'];
-
 const SERVICE_OPTIONS = SERVICES.map(s => ({
   text: { type: 'plain_text', text: s },
   value: s,
 }));
 
 /** -----------------------------
- * Question registry
- * -----------------------------
- * Rule: Only "Complexity Level" is per-service unique.
- * All other questions live once, with `appliesTo` listing services that use it.
- * `id` must be globally unique across all questions in this registry.
- * For service-unique questions (complexity), we generate them dynamically.
- */
+ * Questions registry
+ * ----------------------------- */
 const COMMON_QUESTIONS = [
+  // Shared
   {
     id: 'client_materials',
     appliesTo: ['Messaging', 'Naming', 'Strategy'],
     label: 'How many client materials to review?',
     type: 'static_select',
-    options: ['0','3', '5', '10', '15'],
+    options: ['3 (Three)', '5 (Five)', '10 (Ten)', '15 (Fifteen)'],
   },
   {
     id: 'competitors_analyze',
     appliesTo: ['Messaging', 'Naming', 'Strategy'],
     label: 'How many competitors to analyze?',
     type: 'static_select',
-    options: ['0','2', '3', '5', '8'],
-  },
-  {
-    id: 'stakeholders_interview',
-    appliesTo: ['Naming', 'Strategy'],
-    label: 'How many stakeholders to interview?',
-    type: 'static_select',
-    options: ['0','4', '8', '12', '20'],
+    options: ['2 (Two)', '3 (Three)', '5 (Five)', '8 (Eight)'],
   },
 
-  /** Messaging-only (non-complexity) */
+  /** Messaging-only */
   {
     id: 'messaging_strategy_session',
     appliesTo: ['Messaging'],
-    label: 'Messaging: How long of a strategy work session is required?',
+    label: 'How long of a strategy work session is required?',
     type: 'static_select',
-    options: ['None','60 minutes', '1.5 hours', '4 hours'],
+    options: ['60 minutes', '1.5 hours', '4 hours'],
   },
   {
     id: 'messaging_review_rounds',
     appliesTo: ['Messaging'],
-    label: 'Messaging: How many rounds of review?',
+    label: 'How many rounds of review?',
     type: 'static_select',
-    options: ['None', 'One', 'Two', 'Three'],
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
   },
   {
-    id: 'messaging_immersion_call_duration',
+    id: 'messaging_primary_target_audiences',
     appliesTo: ['Messaging'],
-    label: 'What duration would you prefer for the immersion call?',
+    label: 'How many primary target audiences should be prioritised?',
     type: 'static_select',
-    options: ['None','60 mins', '90 mins', '120 mins'],
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
   },
   {
-    id: 'messaging_virtual_strategic_session',
+    id: 'messaging_sharp_messaging_themes',
     appliesTo: ['Messaging'],
-    label: 'How many virtual strategic sessions?',
+    label: 'How many sharp messaging themes?',
     type: 'static_select',
-    options: ['Zero','One', 'Two', 'Three'],
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_headline_options',
+    appliesTo: ['Messaging'],
+    label: 'How many headline options?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_topline_demos_of_existing_products',
+    appliesTo: ['Messaging'],
+    label: 'How many topline demos?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_facilitate_the_work',
+    appliesTo: ['Messaging'],
+    label: 'How to facilitate the work session?',
+    type: 'static_select',
+    options: ['In-person', 'Virtual'],
+  },
+  {
+    id: 'messaging_top-level_messages',
+    appliesTo: ['Messaging'],
+    label: 'How many top-level messages?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_rounds_of_refinement',
+    appliesTo: ['Messaging'],
+    label: 'How many rounds of refinement?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_dedicated_rounds_of_internal_feedback',
+    appliesTo: ['Messaging'],
+    label: 'How many internal feedback rounds?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_hour_worksession_with_internal_teams',
+    appliesTo: ['Messaging'],
+    label: 'How many hours worksession?',
+    type: 'static_select',
+    options: ['1-hour', '90-minutes', '2-hours', '4-hours'],
+  },
+  {
+    id: 'messaging_core_messages_aligned',
+    appliesTo: ['Messaging'],
+    label: 'How many core messages?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '8 (Eight)'],
+  },
+  {
+    id: 'messaging_interviews_with_internal_stakeholders',
+    appliesTo: ['Messaging'],
+    label: 'How many interviews?',
+    type: 'static_select',
+    options: ['0 (Zero)', '3 (Three)', '5 (Five)', '7 (Seven)'],
+  },
+  {
+    id: 'messaging_best_practices_communication',
+    appliesTo: ['Messaging'],
+    label: 'How many best-practice assets?',
+    type: 'static_select',
+    options: ['0 (Zero)', '3 (Three)', '5 (Five)', '8 (Eight)'],
+  },
+  {
+    id: 'messaging_payment_timeline_from_the_invoice',
+    appliesTo: ['Messaging'],
+    label: 'Payment timeline?',
+    type: 'static_select',
+    options: ['30 days', '45 days', '60 days', '90 days'],
+  },
+  {
+    id: 'messaging_product_information_session',
+    appliesTo: ['Messaging'],
+    label: 'How many product info sessions?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_demos_for_existing_products',
+    appliesTo: ['Messaging'],
+    label: 'How many demos?',
+    type: 'static_select',
+    options: ['0 (Zero)', '2 (Two)', '4 (Four)', '6 (Six)'],
+  },
+  {
+    id: 'messaging_tailored_version_of_the_message_framework',
+    appliesTo: ['Messaging'],
+    label: 'How many tailored frameworks?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_high_impact_touchpoints',
+    appliesTo: ['Messaging'],
+    label: 'How many high-impact touchpoints?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_How_many_product_messages',
+    appliesTo: ['Messaging'],
+    label: 'How many product messages?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_Recommendations_on_how_product',
+    appliesTo: ['Messaging'],
+    label: 'How many recommendations?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_60-minute_virtual_workshop',
+    appliesTo: ['Messaging'],
+    label: 'How many virtual workshops?',
+    type: 'static_select',
+    options: ['0 (Zero)', '1 (One)', '2 (Two)', '3 (Three)'],
+  },
+  {
+    id: 'messaging_do’s_and_don’ts_suggestions',
+    appliesTo: ['Messaging'],
+    label: 'How many tactical suggestions?',
+    type: 'static_select',
+    options: ['0 (Zero)', '4 (Four)', '8 (Eight)', '12 (Twelve)'],
+  },
+  {
+    id: 'messaging_clear_behavioral_commitments',
+    appliesTo: ['Messaging'],
+    label: 'How many commitments?',
+    type: 'static_select',
+    options: ['0 (Zero)', '3 (Three)', '5 (Five)', '8 (Eight)'],
   },
 
-  /** Naming-only (non-complexity) */
-  {
-    id: 'naming_creative_territories',
-    appliesTo: ['Naming'],
-    label: 'Naming: How many unique creative naming territories?',
-    type: 'static_select',
-    options: ['0','2', '4', '6'],
-  },
-  {
-    id: 'naming_options',
-    appliesTo: ['Naming'],
-    label: 'Naming: How many naming options?',
-    type: 'static_select',
-    options: ['0','100', '200', '300', '400'],
-  },
-  {
-    id: 'naming_prescreened_candidates',
-    appliesTo: ['Naming'],
-    label: 'Naming: How many pre-screened name candidates?',
-    type: 'static_select',
-    options: ['0','10', '20', '30'],
-  },
-  {
-    id: 'naming_legal_vetted',
-    appliesTo: ['Naming'],
-    label: 'Naming: How many shortlist name candidates are legally vetted?',
-    type: 'static_select',
-    options: ['0','3', '6', '8', '10'],
-  },
-  {
-    id: 'naming_shortlist_legal_vetting',
-    appliesTo: ['Naming'],
-    label: 'Naming: How many shortlist name candidates for legal vetting?',
-    type: 'static_select',
-    options: ['0','30', '50', '70', '100'],
-  },
-
-  /** Advertisement-only (no overlaps) */
+  /** Advertisement-only */
   {
     id: 'advertisement_platforms',
     appliesTo: ['Advertisement'],
@@ -121,24 +212,94 @@ const COMMON_QUESTIONS = [
   {
     id: 'advertisement_budget',
     appliesTo: ['Advertisement'],
-    label: 'Advertisement: What is your budget?',
+    label: 'Advertisement: Budget',
     type: 'plain_text_input',
     placeholder: 'e.g. $5000/month',
   },
   {
     id: 'advertisement_duration',
     appliesTo: ['Advertisement'],
-    label: 'Advertisement: Campaign Duration (weeks)',
+    label: 'Advertisement: Campaign Duration',
     type: 'static_select',
-    options: ['0 weeks','2 weeks', '4 weeks', '8 weeks'],
+    options: ['2 weeks', '4 weeks', '8 weeks'],
+  },
+
+  /** Naming-only */
+  {
+    id: 'naming_creative_territories',
+    appliesTo: ['Naming'],
+    label: 'Naming: Creative territories?',
+    type: 'static_select',
+    options: ['2 (Two)', '4 (Four)', '6 (Six)'],
+  },
+  {
+    id: 'naming_options',
+    appliesTo: ['Naming'],
+    label: 'Naming: Options?',
+    type: 'static_select',
+    options: ['100', '200', '300', '400'],
+  },
+  {
+    id: 'naming_prescreened_candidates',
+    appliesTo: ['Naming'],
+    label: 'Pre-screened candidates?',
+    type: 'static_select',
+    options: ['10', '20', '30'],
+  },
+  {
+    id: 'naming_legal_vetted',
+    appliesTo: ['Naming'],
+    label: 'Legally vetted candidates?',
+    type: 'static_select',
+    options: ['3', '6', '8', '10'],
+  },
+  {
+    id: 'naming_shortlist_legal_vetting',
+    appliesTo: ['Naming'],
+    label: 'Shortlist for legal vetting?',
+    type: 'static_select',
+    options: ['30', '50', '70', '100'],
   },
 ];
 
-/** Build a Slack block for a single question descriptor */
+/** -----------------------------
+ * Messaging Complexity (unchanged)
+ * ----------------------------- */
+const MESSAGING_COMPLEXITY_QUESTIONS = {
+  Light: [
+    'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
+    'messaging_primary_target_audiences','messaging_sharp_messaging_themes','messaging_headline_options',
+  ],
+  Medium: [
+    'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
+    'messaging_topline_demos_of_existing_products','messaging_facilitate_the_work',
+    'messaging_top-level_messages','messaging_rounds_of_refinement','messaging_dedicated_rounds_of_internal_feedback',
+    'messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned',
+  ],
+  Large: [
+    'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
+    'messaging_topline_demos_of_existing_products','messaging_interviews_with_internal_stakeholders',
+    'messaging_facilitate_the_work','messaging_top-level_messages','messaging_best_practices_communication',
+    'messaging_rounds_of_refinement','messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned',
+    'messaging_dedicated_rounds_of_internal_feedback','messaging_payment_timeline_from_the_invoice',
+  ],
+  'Extra Large': [
+    'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
+    'messaging_demos_for_existing_products','messaging_interviews_with_internal_stakeholders','messaging_facilitate_the_work',
+    'messaging_hour_worksession_with_internal_teams','messaging_top-level_messages','messaging_best_practices_communication',
+    'messaging_rounds_of_refinement','messaging_core_messages_aligned','messaging_dedicated_rounds_of_internal_feedback',
+    'messaging_product_information_session','messaging_tailored_version_of_the_message_framework','messaging_high_impact_touchpoints',
+    'messaging_How_many_product_messages','messaging_Recommendations_on_how_product','messaging_60-minute_virtual_workshop',
+    'messaging_do’s_and_don’ts_suggestions','messaging_clear_behavioral_commitments','messaging_payment_timeline_from_the_invoice',
+  ],
+};
+
+/** -----------------------------
+ * Helpers
+ * ----------------------------- */
 function buildBlockFromQuestion(q) {
   const block_id = `${q.id}_block`;
 
-  // element (by type)
   let element;
   if (q.type === 'static_select') {
     element = {
@@ -172,22 +333,94 @@ function buildBlockFromQuestion(q) {
   };
 }
 
-/** Build the unique complexity block for a given service */
 function buildComplexityBlock(service) {
   return {
     type: 'input',
     block_id: `${service.toLowerCase()}_complexity_level_block`,
     label: { type: 'plain_text', text: `${service}: Complexity Level` },
+    dispatch_action: true, // <-- IMPORTANT: fire action on selection change
     element: {
       type: 'static_select',
       action_id: 'complexity_level',
+      placeholder: { type: 'plain_text', text: 'Select complexity' },
       options: [
         { text: { type: 'plain_text', text: 'Light' }, value: 'Light' },
         { text: { type: 'plain_text', text: 'Medium' }, value: 'Medium' },
         { text: { type: 'plain_text', text: 'Large' }, value: 'Large' },
+        { text: { type: 'plain_text', text: 'Extra Large' }, value: 'Extra Large' },
       ],
     },
   };
+}
+
+/**
+ * Build blocks for the details view.
+ * Returns { blocks, showSubmit }
+ * - If Messaging is selected but complexity not chosen yet => no questions + hide Submit.
+ * - Once complexity chosen => add allowed Messaging questions + show Submit.
+ * - Other services (non-Messaging) questions can be shown immediately.
+ */
+function buildServiceDetailsBlocks(meta, stateValues) {
+  const { companyName, projectName, date, selectedServices } = meta;
+  const blocks = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Company:* ${companyName}\n*Project:* ${projectName}\n*Date:* ${date}\n*Services:* ${selectedServices.join(', ')}`,
+      },
+    },
+  ];
+
+  // Add complexity pickers
+  selectedServices.forEach(svc => {
+    blocks.push({ type: 'divider' });
+    blocks.push({ type: 'header', text: { type: 'plain_text', text: `${svc} · Complexity` } });
+    blocks.push(buildComplexityBlock(svc));
+  });
+
+  let messagingNeedsComplexity = false;
+  let showSubmit = true;
+
+  // Determine allowed question IDs
+  const allowedIds = new Set();
+
+  selectedServices.forEach(svc => {
+    if (svc === 'Messaging') {
+      const blockId = `${svc.toLowerCase()}_complexity_level_block`;
+      const selectedComplexity =
+        stateValues?.[blockId]?.complexity_level?.selected_option?.value || null;
+
+      if (!selectedComplexity) {
+        // complexity not chosen yet ⇒ don't show Messaging questions, and hide Submit
+        messagingNeedsComplexity = true;
+        showSubmit = false;
+      } else {
+        (MESSAGING_COMPLEXITY_QUESTIONS[selectedComplexity] || []).forEach(id => allowedIds.add(id));
+      }
+    } else {
+      // Non-Messaging: include all applicable questions right away
+      COMMON_QUESTIONS
+        .filter(q => q.appliesTo.includes(svc))
+        .forEach(q => allowedIds.add(q.id));
+    }
+  });
+
+  if (allowedIds.size > 0) {
+    blocks.push({ type: 'divider' });
+    blocks.push({ type: 'header', text: { type: 'plain_text', text: 'Questions' } });
+    COMMON_QUESTIONS
+      .filter(q => allowedIds.has(q.id))
+      .forEach(q => blocks.push(buildBlockFromQuestion(q)));
+  } else if (messagingNeedsComplexity) {
+    // Helpful hint block
+    blocks.push({
+      type: 'section',
+      text: { type: 'mrkdwn', text: '_Select a **Messaging** complexity to proceed._' },
+    });
+  }
+
+  return { blocks, showSubmit };
 }
 
 /** -----------------------------
@@ -202,72 +435,51 @@ const app = new App({
 
 app.command('/service', async ({ ack, body, client }) => {
   await ack();
-  try {
-    await client.views.open({
-      trigger_id: body.trigger_id,
-      view: {
-        type: 'modal',
-        callback_id: 'service_intro_modal',
-        title: { type: 'plain_text', text: 'Project Kickoff' },
-        submit: { type: 'plain_text', text: 'Next' },
-        close: { type: 'plain_text', text: 'Cancel' },
-        blocks: [
-          { type: 'header', text: { type: 'plain_text', text: 'Submitting Details' } },
-          {
-            type: 'input',
-            block_id: 'company_name_block',
-            label: { type: 'plain_text', text: 'Company Name' },
-            element: {
-              type: 'plain_text_input',
-              action_id: 'company_name',
-              placeholder: { type: 'plain_text', text: 'Enter company name' },
-            },
-          },
-          {
-            type: 'input',
-            block_id: 'project_name_block',
-            label: { type: 'plain_text', text: 'Project Name' },
-            element: {
-              type: 'plain_text_input',
-              action_id: 'project_name',
-              placeholder: { type: 'plain_text', text: 'Enter project name' },
-            },
-          },
-          {
-            type: 'input',
-            block_id: 'date_block',
-            label: { type: 'plain_text', text: 'Date' },
-            element: {
-              type: 'datepicker',
-              action_id: 'date',
-              placeholder: { type: 'plain_text', text: 'Select a date' },
-            },
-          },
-          {
-            type: 'input',
-            block_id: 'services_block',
-            label: { type: 'plain_text', text: 'Services We Offer' },
-            element: {
-              type: 'multi_static_select',
-              action_id: 'services',
-              options: SERVICE_OPTIONS,
-            },
-          },
-        ],
-      },
-    });
-  } catch (error) {
-    console.error('Error opening service intro modal:', error);
-  }
+  await client.views.open({
+    trigger_id: body.trigger_id,
+    view: {
+      type: 'modal',
+      callback_id: 'service_intro_modal',
+      title: { type: 'plain_text', text: 'Project Kickoff' },
+      submit: { type: 'plain_text', text: 'Next' },
+      close: { type: 'plain_text', text: 'Cancel' },
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: 'Submitting Details' } },
+        {
+          type: 'input',
+          block_id: 'company_name_block',
+          label: { type: 'plain_text', text: 'Company Name' },
+          element: { type: 'plain_text_input', action_id: 'company_name' },
+        },
+        {
+          type: 'input',
+          block_id: 'project_name_block',
+          label: { type: 'plain_text', text: 'Project Name' },
+          element: { type: 'plain_text_input', action_id: 'project_name' },
+        },
+        {
+          type: 'input',
+          block_id: 'date_block',
+          label: { type: 'plain_text', text: 'Date' },
+          element: { type: 'datepicker', action_id: 'date' },
+        },
+        {
+          type: 'input',
+          block_id: 'services_block',
+          label: { type: 'plain_text', text: 'Services We Offer' },
+          element: { type: 'multi_static_select', action_id: 'services', options: SERVICE_OPTIONS },
+        },
+      ],
+    },
+  });
 });
 
-app.view('service_intro_modal', async ({ ack, view, client }) => {
+app.view('service_intro_modal', async ({ ack, view }) => {
   const values = view.state.values;
   const companyName = values.company_name_block.company_name.value;
   const projectName = values.project_name_block.project_name.value;
   const date = values.date_block.date.selected_date;
-  const selectedServices =
-    values.services_block.services.selected_options.map(opt => opt.value);
+  const selectedServices = values.services_block.services.selected_options.map(o => o.value);
 
   if (!companyName || !projectName || !date || selectedServices.length === 0) {
     await ack({
@@ -282,34 +494,8 @@ app.view('service_intro_modal', async ({ ack, view, client }) => {
     return;
   }
 
-  // Build blocks:
-  // 1) Per-service complexity (unique)
-  const blocks = [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Company:* ${companyName}\n*Project:* ${projectName}\n*Date:* ${date}\n*Services:* ${selectedServices.join(', ')}`,
-      },
-    },
-  ];
-
-  selectedServices.forEach(svc => {
-    blocks.push({ type: 'divider' });
-    blocks.push({ type: 'header', text: { type: 'plain_text', text: `${svc} · Complexity` } });
-    blocks.push(buildComplexityBlock(svc));
-  });
-
-  // 2) Shared/common questions: include each question ONCE if it applies to any selected service
-  const visibleCommon = COMMON_QUESTIONS.filter(q =>
-    q.appliesTo.some(svc => selectedServices.includes(svc))
-  );
-
-  if (visibleCommon.length > 0) {
-    blocks.push({ type: 'divider' });
-    blocks.push({ type: 'header', text: { type: 'plain_text', text: 'Shared Questions' } });
-    visibleCommon.forEach(q => blocks.push(buildBlockFromQuestion(q)));
-  }
+  const meta = { companyName, projectName, date, selectedServices };
+  const { blocks, showSubmit } = buildServiceDetailsBlocks(meta, /* stateValues */ undefined);
 
   await ack({
     response_action: 'update',
@@ -317,9 +503,35 @@ app.view('service_intro_modal', async ({ ack, view, client }) => {
       type: 'modal',
       callback_id: 'service_details_modal',
       title: { type: 'plain_text', text: 'Service Details' },
-      submit: { type: 'plain_text', text: 'Submit' },
+      // Hide submit until questions are visible
+      ...(showSubmit ? { submit: { type: 'plain_text', text: 'Submit' } } : {}),
       close: { type: 'plain_text', text: 'Cancel' },
-      private_metadata: JSON.stringify({ companyName, projectName, date, selectedServices }),
+      private_metadata: JSON.stringify(meta),
+      blocks,
+    },
+  });
+});
+
+/**
+ * React to complexity selection and update the modal in-place
+ */
+app.action('complexity_level', async ({ ack, body, client }) => {
+  await ack();
+
+  const meta = JSON.parse(body.view.private_metadata || '{}');
+  const stateValues = body.view.state.values;
+  const { blocks, showSubmit } = buildServiceDetailsBlocks(meta, stateValues);
+
+  await client.views.update({
+    view_id: body.view.id,
+    hash: body.view.hash, // avoid race conditions
+    view: {
+      type: 'modal',
+      callback_id: 'service_details_modal',
+      title: { type: 'plain_text', text: 'Service Details' },
+      ...(showSubmit ? { submit: { type: 'plain_text', text: 'Submit' } } : {}),
+      close: { type: 'plain_text', text: 'Cancel' },
+      private_metadata: body.view.private_metadata,
       blocks,
     },
   });
@@ -340,25 +552,22 @@ app.view('service_details_modal', async ({ ack, view, body }) => {
     service_details: {},
   };
 
-  // 1) Read per-service complexity answers
+  // Read per-service complexity first
+  const complexityMap = {};
   selectedServices.forEach(service => {
     const blockId = `${service.toLowerCase()}_complexity_level_block`;
-    const complexity =
-      values[blockId]?.complexity_level?.selected_option?.value || null;
-
-    result.service_details[service] = {
-      complexity_level: complexity,
-    };
+    const complexity = values[blockId]?.complexity_level?.selected_option?.value || null;
+    result.service_details[service] = { complexity_level: complexity };
+    complexityMap[service] = complexity;
   });
 
-  // 2) Read each visible shared question ONCE and fan out to all services that use it
+  // Read only the blocks present (what the user actually saw)
   COMMON_QUESTIONS.forEach(q => {
-    // Was this question shown? (block present?)
     const blockId = `${q.id}_block`;
-    if (!values[blockId]) return; // not shown due to service selection
+    if (!values[blockId]) return;
 
-    let answer;
     const el = values[blockId][q.id];
+    let answer = null;
 
     if (q.type === 'static_select') {
       answer = el?.selected_option?.value || null;
@@ -368,25 +577,26 @@ app.view('service_details_modal', async ({ ack, view, body }) => {
       answer = el?.value || null;
     }
 
-    // Assign to every selected service that this question applies to
     selectedServices.forEach(svc => {
+      if (svc === 'Messaging') {
+        const allowed = MESSAGING_COMPLEXITY_QUESTIONS[complexityMap[svc]] || [];
+        if (!allowed.includes(q.id)) return;
+      }
       if (!q.appliesTo.includes(svc)) return;
       if (!result.service_details[svc]) result.service_details[svc] = {};
       result.service_details[svc][q.id] = answer;
     });
   });
 
-  // Send to your webhook (unchanged)
   try {
-    const response = await fetch('https://villain-branding.app.n8n.cloud/webhook/add35f32-af0c-446f-a202-7a7db367e193', {
+    const r = await fetch('https://villain-branding.app.n8n.cloud/webhook/b9223a9e-8b4a-4235-8b5f-144fcf3f27a4', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(result),
     });
-    const respText = await response.text();
-    console.log('Webhook response:', respText);
-  } catch (error) {
-    console.error('Error sending data to webhook:', error);
+    console.log('Webhook:', await r.text());
+  } catch (e) {
+    console.error('Webhook error:', e);
   }
 });
 

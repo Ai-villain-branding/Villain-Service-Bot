@@ -194,6 +194,12 @@ const COMMON_QUESTIONS = [
     type: 'static_select',
     options: ['zero (0)', 'three (3)', 'five (5)', 'eight (8)'],
   },
+  {
+  id: 'messaging_expiration_date',
+  appliesTo: ['Messaging'],
+  label: 'Expiration Date',
+  type: 'datepicker',
+},
 
   /** Advertisement-only (no overlaps) */
   {
@@ -267,20 +273,20 @@ const COMMON_QUESTIONS = [
 const MESSAGING_COMPLEXITY_QUESTIONS = {
   Light: [
     'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
-    'messaging_primary_target_audiences','messaging_sharp_messaging_themes','messaging_headline_options',
+    'messaging_primary_target_audiences','messaging_sharp_messaging_themes','messaging_headline_options','messaging_expiration_date',
   ],
   Medium: [
     'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
     'messaging_topline_demos_of_existing_products','messaging_facilitate_the_work',
     'messaging_top-level_messages','messaging_rounds_of_refinement','messaging_dedicated_rounds_of_internal_feedback',
-    'messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned',
+    'messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned','messaging_expiration_date',
   ],
   Large: [
     'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
     'messaging_topline_demos_of_existing_products','messaging_interviews_with_internal_stakeholders',
     'messaging_facilitate_the_work','messaging_top-level_messages','messaging_best_practices_communication',
     'messaging_rounds_of_refinement','messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned',
-    'messaging_dedicated_rounds_of_internal_feedback','messaging_payment_timeline_from_the_invoice',
+    'messaging_dedicated_rounds_of_internal_feedback','messaging_payment_timeline_from_the_invoice','messaging_expiration_date',
   ],
   'Extra Large': [
     'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
@@ -289,7 +295,7 @@ const MESSAGING_COMPLEXITY_QUESTIONS = {
     'messaging_rounds_of_refinement','messaging_core_messages_aligned','messaging_dedicated_rounds_of_internal_feedback',
     'messaging_product_information_session','messaging_tailored_version_of_the_message_framework','messaging_high_impact_touchpoints',
     'messaging_How_many_product_messages','messaging_Recommendations_on_how_product','messaging_60-minute_virtual_workshop',
-    'messaging_do’s_and_don’ts_suggestions','messaging_clear_behavioral_commitments','messaging_payment_timeline_from_the_invoice',
+    'messaging_do’s_and_don’ts_suggestions','messaging_clear_behavioral_commitments','messaging_payment_timeline_from_the_invoice','messaging_expiration_date',
   ],
 };
 /** -----------------------------

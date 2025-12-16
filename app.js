@@ -192,14 +192,14 @@ const COMMON_QUESTIONS = [
     appliesTo: ['Messaging'],
     label: 'How many clear behavioral commitments?',
     type: 'static_select',
-    options: ['30 days', '45 days', '60 days'],
+    options: ['zero (0)', 'one (1)', 'two (2)', 'three (3)'],
   },
   {
     id: 'messaging_NET_payments',
     appliesTo: ['Messaging'],
     label: 'What are the NET terms?',
     type: 'static_select',
-    options: ['zero (0)', 'three (3)', 'five (5)', 'eight (8)'],
+    options: ['30 days', '45 days', '60 days'],
   },
   {
   id: 'messaging_expiration_date',

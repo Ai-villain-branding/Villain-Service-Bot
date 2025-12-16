@@ -309,21 +309,35 @@ function buildBlockFromQuestion(q) {
     element = {
       type: 'static_select',
       action_id: q.id,
-      options: q.options.map(o => ({ text: { type: 'plain_text', text: o }, value: o })),
+      options: q.options.map(o => ({
+        text: { type: 'plain_text', text: o },
+        value: o,
+      })),
       placeholder: { type: 'plain_text', text: 'Select…' },
     };
   } else if (q.type === 'multi_static_select') {
     element = {
       type: 'multi_static_select',
       action_id: q.id,
-      options: q.options.map(o => ({ text: { type: 'plain_text', text: o }, value: o })),
+      options: q.options.map(o => ({
+        text: { type: 'plain_text', text: o },
+        value: o,
+      })),
       placeholder: { type: 'plain_text', text: 'Select one or more…' },
     };
   } else if (q.type === 'plain_text_input') {
     element = {
       type: 'plain_text_input',
       action_id: q.id,
-      placeholder: q.placeholder ? { type: 'plain_text', text: q.placeholder } : undefined,
+      placeholder: q.placeholder
+        ? { type: 'plain_text', text: q.placeholder }
+        : undefined,
+    };
+  } else if (q.type === 'datepicker') {
+    element = {
+      type: 'datepicker',
+      action_id: q.id,
+      placeholder: { type: 'plain_text', text: 'Select a date' },
     };
   } else {
     throw new Error(`Unsupported question type: ${q.type}`);
@@ -336,6 +350,7 @@ function buildBlockFromQuestion(q) {
     element,
   };
 }
+
 
 function buildComplexityBlock(service) {
   return {
@@ -579,6 +594,9 @@ app.view('service_details_modal', async ({ ack, view, body }) => {
       answer = (el?.selected_options || []).map(o => o.value);
     } else if (q.type === 'plain_text_input') {
       answer = el?.value || null;
+    }
+    else if (q.type === 'datepicker') {
+  answer = el?.selected_date || null;
     }
 
     selectedServices.forEach(svc => {

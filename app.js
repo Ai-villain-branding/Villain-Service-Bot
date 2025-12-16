@@ -125,13 +125,6 @@ const COMMON_QUESTIONS = [
     options: ['zero (0)', 'three (3)', 'five (5)', 'eight (8)'],
   },
   {
-    id: 'messaging_payment_timeline_from_the_invoice',
-    appliesTo: ['Messaging'],
-    label: 'What is the payment timeline from the invoice date for work delivered to the client?',
-    type: 'static_select',
-    options: ['30 days', '45 days', '60 days', '90 days'],
-  },
-  {
     id: 'messaging_product_information_session',
     appliesTo: ['Messaging'],
     label: 'How many product information session led by the client?',
@@ -293,7 +286,7 @@ const MESSAGING_COMPLEXITY_QUESTIONS = {
     'messaging_topline_demos_of_existing_products','messaging_interviews_with_internal_stakeholders',
     'messaging_facilitate_the_work','messaging_top-level_messages','messaging_best_practices_communication',
     'messaging_rounds_of_refinement','messaging_hour_worksession_with_internal_teams','messaging_core_messages_aligned',
-    'messaging_dedicated_rounds_of_internal_feedback','messaging_payment_timeline_from_the_invoice','messaging_clear_behavioral_commitments','messaging_NET_payments','messaging_expiration_date',
+    'messaging_dedicated_rounds_of_internal_feedback','messaging_clear_behavioral_commitments','messaging_NET_payments','messaging_expiration_date',
   ],
   'Extra Large': [
     'client_materials','competitors_analyze','messaging_strategy_session','messaging_review_rounds',
@@ -302,7 +295,7 @@ const MESSAGING_COMPLEXITY_QUESTIONS = {
     'messaging_rounds_of_refinement','messaging_core_messages_aligned','messaging_dedicated_rounds_of_internal_feedback',
     'messaging_product_information_session','messaging_tailored_version_of_the_message_framework','messaging_high_impact_touchpoints',
     'messaging_How_many_product_messages','messaging_Recommendations_on_how_product','messaging_60-minute_virtual_workshop',
-    'messaging_do’s_and_don’ts_suggestions','messaging_clear_behavioral_commitments','messaging_payment_timeline_from_the_invoice','messaging_clear_behavioral_commitments','messaging_NET_payments','messaging_expiration_date',
+    'messaging_do’s_and_don’ts_suggestions','messaging_clear_behavioral_commitments','messaging_clear_behavioral_commitments','messaging_NET_payments','messaging_expiration_date',
   ],
 };
 /** -----------------------------

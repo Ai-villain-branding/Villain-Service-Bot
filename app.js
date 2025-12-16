@@ -194,6 +194,12 @@ const COMMON_QUESTIONS = [
     type: 'static_select',
     options: ['Zero (0)', 'Three (3)', 'Five (5)', 'Eight (8)'],
   },
+  {
+    id: 'messaging_expiration_date',
+    appliesTo: ['Messaging'],
+    label: { type: 'plain_text', text: 'Date' },
+    element: { type: 'datepicker', action_id: 'date' },
+  },
 
   /** Advertisement-only (no overlaps) */
   {

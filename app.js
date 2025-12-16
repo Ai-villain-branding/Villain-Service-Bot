@@ -41,13 +41,6 @@ const COMMON_QUESTIONS = [
     options: ['60 minutes', '1.5 hours', '4 hours'],
   },
   {
-    id: 'messaging_review_rounds',
-    appliesTo: ['Messaging'],
-    label: 'How many rounds of review?',
-    type: 'static_select',
-    options: ['none', 'one (1)', 'two (2)', 'three (3)'],
-  },
-  {
     id: 'messaging_primary_target_audiences',
     appliesTo: ['Messaging'],
     label: 'How many primary target audiences should be prioritised?',
